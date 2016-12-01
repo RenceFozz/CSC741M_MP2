@@ -113,7 +113,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
     public final void init(){
         ta_log.append("Initializing systems...\n");
         for(int i=0;i<dir.length;i++){
-            System.out.println(i);
+            //System.out.println(i);
             path = System.getProperty("user.dir")+File.separatorChar+"images"+File.separatorChar+dir[i]+File.separatorChar;
             File file = new File(path);
             ArrayList<File> folder = new ArrayList<>(Arrays.asList(file.listFiles()));
@@ -132,7 +132,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
                 case 2: MJ      = folder; break;
                 default: System.err.println("That's not supposed to happen");
             }
-            System.out.println("Files in images Folder: "+folder.size());
+            //System.out.println("Files in images Folder: "+folder.size());
         }
         rgbToGS(uni.get(0));
     }
@@ -141,7 +141,6 @@ public class GoldenGUI extends JFrame implements ItemListener{
         BufferedImage bi1, bi2;
         int RGB1, i, j, A, R, G, B, newVal;
         i = j= 0;
-        //double ;
         Color c;
         ImageGS test = new ImageGS();
         
@@ -173,7 +172,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
             
             JLabel picLabel = new JLabel(new ImageIcon(bi2));
             p_video.add(picLabel);
-            test.viewAlpha();
+            test.viewQuantities();
         } catch (Exception ex) {
             ta_log.append("Image does not exist - RGB : " + i + ", " + j + "\n");
         }
@@ -186,7 +185,6 @@ public class GoldenGUI extends JFrame implements ItemListener{
     
     public static int getAlpha(int rgb) {
         return (rgb >> 24) & 0xFF;
-        // return rgb & 0xFF000000;
     }
     
     /*private JMenuBar setMenuBar(){
