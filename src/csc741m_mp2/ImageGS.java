@@ -26,15 +26,19 @@ public class ImageGS {
         return alpha_pixels;
     }
     
+    public Integer getPixel(int i){
+        return gs_pixels.get(i);
+    }
+    
     public void addPixel(int i){
         gs_pixels.add(i);
         quantity[i]++;
     }
     
     public void addAlpha(int i){
-        if(!alpha_pixels.contains(i)){
+        //if(!alpha_pixels.contains(i)){
             alpha_pixels.add(i);
-        }
+        //}
     }
     
     public void viewPixels(){

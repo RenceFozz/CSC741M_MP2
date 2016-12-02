@@ -39,23 +39,32 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class GoldenGUI extends JFrame implements ItemListener{
     private final JPanel p_main, p_video;
     private final JTextArea ta_log;
-    private JComboBox cb_method, cb_option;
-    private JScrollPane jsp_1;
+    private final JComboBox cb_option;
+    private final JLabel lbl_imgPane, lbl_method, lbl_log;
+    private final JScrollPane jsp_1;
     private JMenu file;
-    private JMenuItem open;
+    private JMenuItem run;
     private String path;
     private JFileChooser jfc;
-    private File baseFile;
     private ArrayList<File> uni, _777, MJ;
+    private ArrayList<ImageGS> imageFrame;
     private Integer currOpt;
     private String[] dir;
     
     public GoldenGUI(){
         super("Video Segmentation System");
+        super.setJMenuBar(setMenuBar());
         
-        ta_log = new JTextArea(10,15);
-        
+        ta_log = new JTextArea(5,15);
+        imageFrame = new ArrayList<>();
         currOpt = 0;
+        
+        lbl_log = new JLabel("LOG");
+        lbl_log.setFont(new Font("Calibri", Font.PLAIN, 14));
+        lbl_method = new JLabel("METHOD");
+        lbl_method.setFont(new Font("Calibri", Font.PLAIN, 14));
+        lbl_imgPane = new JLabel("IMAGE");
+        lbl_imgPane.setFont(new Font("Calibri", Font.PLAIN, 14));
         
         dir = new String[]{"uni","777","mjack"};
         cb_option = new JComboBox(dir);
@@ -67,7 +76,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
         p_video = new JPanel();
         jsp_1 = new JScrollPane(p_video, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        jsp_1.setPreferredSize(new Dimension(100, 300));
+        jsp_1.setPreferredSize(new Dimension(200, 300));
         p_main.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         
@@ -77,24 +86,50 @@ public class GoldenGUI extends JFrame implements ItemListener{
         c.fill = GridBagConstraints.HORIZONTAL;
 	c.weightx = 0.5;
 	c.gridx = 0;
-        c.gridwidth = 2;
-	c.insets = new Insets(10,10,10,10);
-	this.p_main.add(jsp_1, c);
-        
-        //Second Line
-	c.gridy = 1;
-        c.gridwidth = 1;
-        
-        c.fill = GridBagConstraints.HORIZONTAL;
-	c.weightx = 0.5;
-	c.gridx = 0;
-	c.insets = new Insets(10,10,10,10);
-	this.p_main.add(cb_option, c);
+	c.insets = new Insets(5,10,5,10);
+	this.p_main.add(lbl_imgPane, c);
         
         c.fill = GridBagConstraints.HORIZONTAL;
 	c.weightx = 0.5;
 	c.gridx = 1;
+	c.insets = new Insets(5,10,5,10);
+	this.p_main.add(lbl_method, c);
+        
+        //Second Line
+        c.gridy = 1;
+        
+        c.fill = GridBagConstraints.HORIZONTAL;
+	c.weightx = 0.5;
+	c.gridx = 0;
+        c.gridheight = 3;
 	c.insets = new Insets(10,10,10,10);
+	this.p_main.add(jsp_1, c);
+        
+        c.fill = GridBagConstraints.HORIZONTAL;
+	c.weightx = 0.5;
+	c.gridx = 1;
+        c.gridheight = 1;
+	c.insets = new Insets(10,10,10,10);
+	this.p_main.add(cb_option, c);
+        
+        //Third Line
+	c.gridy = 2;
+        
+        c.fill = GridBagConstraints.HORIZONTAL;
+	c.weightx = 0.5;
+	c.gridx = 1;
+        c.gridheight = 1;
+	c.insets = new Insets(10,10,10,10);
+	this.p_main.add(lbl_log, c);
+        
+        //Fourth Line
+	c.gridy = 3;
+        
+        c.fill = GridBagConstraints.HORIZONTAL;
+	c.weightx = 0.5;
+	c.gridx = 1;
+        c.gridheight = 1;
+	c.insets = new Insets(10,10,100,10);
 	this.p_main.add(ta_log, c);
         
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -111,9 +146,8 @@ public class GoldenGUI extends JFrame implements ItemListener{
     }
     
     public final void init(){
-        ta_log.append("Initializing systems...\n");
+        ta_log.append("Initializing system...\n");
         for(int i=0;i<dir.length;i++){
-            //System.out.println(i);
             path = System.getProperty("user.dir")+File.separatorChar+"images"+File.separatorChar+dir[i]+File.separatorChar;
             File file = new File(path);
             ArrayList<File> folder = new ArrayList<>(Arrays.asList(file.listFiles()));
@@ -134,10 +168,9 @@ public class GoldenGUI extends JFrame implements ItemListener{
             }
             //System.out.println("Files in images Folder: "+folder.size());
         }
-        rgbToGS(uni.get(0));
     }
     
-    public void rgbToGS(File filename){
+    public ImageGS rgbToGS(File filename){
         BufferedImage bi1, bi2;
         int RGB1, i, j, A, R, G, B, newVal;
         i = j= 0;
@@ -156,7 +189,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
                 for(j=0; j<imHeight;j++){
                     RGB1 = bi1.getRGB(i,j);
                     c = new Color(RGB1);
-                    A = getAlpha(RGB1);
+                    A = (RGB1 >> 24) & 0xFF;
                     R = c.getRed();
                     G = c.getGreen();
                     B = c.getBlue();
@@ -164,49 +197,47 @@ public class GoldenGUI extends JFrame implements ItemListener{
                     newVal = (R + G + B) / 3; // grey by averaging the pixels
                     test.addPixel(newVal);
                     test.addAlpha(A);
-                    R = G = B = newVal;
-                    newVal = createRGB(A, R, G, B);
-                    bi2.setRGB(i, j, newVal);
+                    //R = G = B = newVal;
+                    //newVal = (A << 24) + (R << 16) + (G << 8) + B;
+                    //bi2.setRGB(i, j, newVal);
                 }
             }
-            
-            JLabel picLabel = new JLabel(new ImageIcon(bi2));
-            p_video.add(picLabel);
-            test.viewQuantities();
+            //imageFrame.add(test);
+            //JLabel picLabel = new JLabel(new ImageIcon(bi2));
+            //p_video.add(picLabel);
+            //test.viewQuantities();
         } catch (Exception ex) {
             ta_log.append("Image does not exist - RGB : " + i + ", " + j + "\n");
         }
+        return test;
     }
     
-    public static int createRGB(int alpha, int r, int g, int b) {
-        int rgb = (alpha << 24) + (r << 16) + (g << 8) + b;
-        return rgb;
+    private void run(){
+        ArrayList<File> temp = null;
+        int SD;
+        ImageGS x, y;
+        switch(currOpt){
+            case 0: temp = uni; break;
+            case 1: temp = _777; break;
+            case 2: temp = MJ; break;
+        }
+        
+        for(int i=0; i<temp.size() - 1; i++){
+            SD = 0;
+            x = rgbToGS(temp.get(i));
+            y = rgbToGS(temp.get(i+1));
+            System.out.println("Name "+i+": "+temp.get(i).getName());
+            for(int j=0; j<256; j++){
+                int a = x.getPixel(j);
+                int b = y.getPixel(j);
+                SD += Math.abs(a-b);
+            }
+            System.out.println("SD of "+i+" & "+(i+1)+" = " + SD);
+        }
+        
     }
     
-    public static int getAlpha(int rgb) {
-        return (rgb >> 24) & 0xFF;
-    }
-    
-    /*private JMenuBar setMenuBar(){
-        JMenuBar mb = new JMenuBar();
-        
-        file = new JMenu("File");
-        open = new JMenuItem("Open");
-        
-        open.addActionListener((ActionEvent e) -> {
-            
-        });
-        
-        open.registerKeyboardAction((ActionEvent e) -> {open.doClick();},
-                KeyStroke.getKeyStroke('O', Event.CTRL_MASK, false), JComponent.WHEN_IN_FOCUSED_WINDOW);
-        
-        file.add(open);
-        mb.add(file);
-        
-        return mb;
-    }
-    
-    private void openFile() {
+    /*private void openFile() {
         jfc = new JFileChooser(path);
         FileFilter filter = new FileNameExtensionFilter("JPG/JPEG", "jpg", "jpeg");
         jfc.setAcceptAllFileFilterUsed(false);
@@ -224,21 +255,34 @@ public class GoldenGUI extends JFrame implements ItemListener{
         }
     }*/
     
+    private JMenuBar setMenuBar(){
+        JMenuBar mb = new JMenuBar();
+        
+        file = new JMenu("File");
+        run = new JMenuItem("Run");
+        
+        run.addActionListener((ActionEvent e) -> {
+            run();
+        });
+        
+        run.registerKeyboardAction((ActionEvent e) -> {run.doClick();},
+                KeyStroke.getKeyStroke('R', Event.CTRL_MASK, false), JComponent.WHEN_IN_FOCUSED_WINDOW);
+        
+        file.add(run);
+        mb.add(file);
+        
+        return mb;
+    }
+    
     @Override
     public void itemStateChanged(ItemEvent e) {
         JComboBox source = (JComboBox) e.getSource();
         switch(source.getName()) {
-            case "cb_method":
-                if(e.getStateChange() == ItemEvent.SELECTED) {
-                    //System.out.println(method);
-                    ta_log.setText("Method Combo Box changed");
-                }
-            break;
             case "cb_option":
                 if(e.getStateChange() == ItemEvent.SELECTED) {
                     currOpt = cb_option.getSelectedIndex();
                     System.out.println(currOpt);
-                    ta_log.setText("Option Combo Box changed");
+                    ta_log.append("Option Combo Box changed\n");
                 }
             break;
             default: System.out.println("The ComboBox does not exist");
