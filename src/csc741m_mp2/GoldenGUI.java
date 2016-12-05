@@ -168,6 +168,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
             }
             //System.out.println("Files in images Folder: "+folder.size());
         }
+        rgbToGS(uni.get(0));
     }
     
     public ImageGS rgbToGS(File filename){
@@ -183,7 +184,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
             int imHeight = bi1.getHeight();
             int imWidth = bi1.getWidth();
             
-            bi2 = new BufferedImage(imWidth, imHeight, 1);
+            //bi2 = new BufferedImage(imWidth, imHeight, 1);
             
             for(i=0; i<imWidth; i++){
                 for(j=0; j<imHeight;j++){
@@ -205,7 +206,8 @@ public class GoldenGUI extends JFrame implements ItemListener{
             //imageFrame.add(test);
             //JLabel picLabel = new JLabel(new ImageIcon(bi2));
             //p_video.add(picLabel);
-            //test.viewQuantities();
+            test.viewPixels();
+            test.viewQuantities();
         } catch (Exception ex) {
             ta_log.append("Image does not exist - RGB : " + i + ", " + j + "\n");
         }
@@ -222,19 +224,18 @@ public class GoldenGUI extends JFrame implements ItemListener{
             case 2: temp = MJ; break;
         }
         
-        for(int i=0; i<temp.size() - 1; i++){
+        for(int i=0; i<2; i++){
             SD = 0;
             x = rgbToGS(temp.get(i));
             y = rgbToGS(temp.get(i+1));
             System.out.println("Name "+i+": "+temp.get(i).getName());
             for(int j=0; j<256; j++){
-                int a = x.getPixel(j);
-                int b = y.getPixel(j);
+                int a = x.getQuantity(j);
+                int b = y.getQuantity(j);
                 SD += Math.abs(a-b);
             }
             System.out.println("SD of "+i+" & "+(i+1)+" = " + SD);
         }
-        
     }
     
     /*private void openFile() {

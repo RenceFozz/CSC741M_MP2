@@ -14,7 +14,7 @@ public class ImageGS {
     public ImageGS(){
         gs_pixels = new ArrayList<>();
         alpha_pixels = new ArrayList<>();
-        quantity = new Integer[256];
+        quantity = new Integer[64];
         Arrays.fill(quantity,0);
     }
     
@@ -30,9 +30,13 @@ public class ImageGS {
         return gs_pixels.get(i);
     }
     
+    public Integer getQuantity(int i){
+        return quantity[i];
+    }
+    
     public void addPixel(int i){
         gs_pixels.add(i);
-        quantity[i]++;
+        quantity[i/4]++;
     }
     
     public void addAlpha(int i){
@@ -42,8 +46,9 @@ public class ImageGS {
     }
     
     public void viewPixels(){
+        System.out.println(gs_pixels.size());
         for(int i=0;i<gs_pixels.size();i++){
-            System.out.println(gs_pixels.get(i));
+            System.out.println("Pixel #"+(i+1)+":"+gs_pixels.get(i));
         }
     }
     
@@ -54,9 +59,12 @@ public class ImageGS {
     }
     
     public void viewQuantities(){
+        Integer keeper = 0;
         for(int i=0;i<quantity.length;i++){
             System.out.println("Quantity of "+ i + ": " +quantity[i]);
+            keeper += quantity[i];
         }
+        System.out.println("Total of Quantity: "+keeper);
     }
     
 }
