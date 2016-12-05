@@ -247,7 +247,20 @@ public class GoldenGUI extends JFrame implements ItemListener{
     }
     
     public void GT(){
-        
+        //Find transitions and kill them all
+    }
+    
+    public void AveHisto(ArrayList<ImageGS> last){
+        //Average Histogram Method then display to GUI
+        Double ave;
+        ArrayList<Double> overall = new ArrayList<>(); 
+        for(int i=0; i<64; i++){
+            ave = 0.0;
+            for(int j=0; j<last.size(); j++){
+                ave += last.get(j).getQuantity(i);
+            }
+            overall.add(ave/last.size());
+        }
     }
     
     /*private void openFile() {
