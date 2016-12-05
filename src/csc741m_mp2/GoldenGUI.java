@@ -46,22 +46,27 @@ public class GoldenGUI extends JFrame implements ItemListener{
     private JMenuItem run;
     private String path;
     private JFileChooser jfc;
-    private ArrayList<File> uni, _777, MJ;
-    private ArrayList<ImageGS> imageFrame;
+    private ArrayList<File> uni, _777, MJ;          //Image Databases
+    private final ArrayList<ImageGS> imageFrame;    //Contains the Grayscale Images
+    private final ArrayList<Integer> SD;            //SD between frames
     private Integer currOpt;
-    private String[] dir;
+    private final String[] dir;
     
     public GoldenGUI(){
         super("Video Segmentation System");
         super.setJMenuBar(setMenuBar());
         
-        ta_log = new JTextArea(5,15);
+        ta_log = new JTextArea(8,10);
+        ta_log.setEditable(false);
+        ta_log.setWrapStyleWord(true);
+        ta_log.setLineWrap(true);
         imageFrame = new ArrayList<>();
+        SD = new ArrayList<>();
         currOpt = 0;
         
         lbl_log = new JLabel("LOG");
         lbl_log.setFont(new Font("Calibri", Font.PLAIN, 14));
-        lbl_method = new JLabel("METHOD");
+        lbl_method = new JLabel("DATABASE");
         lbl_method.setFont(new Font("Calibri", Font.PLAIN, 14));
         lbl_imgPane = new JLabel("IMAGE");
         lbl_imgPane.setFont(new Font("Calibri", Font.PLAIN, 14));
@@ -76,7 +81,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
         p_video = new JPanel();
         jsp_1 = new JScrollPane(p_video, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        jsp_1.setPreferredSize(new Dimension(200, 300));
+        jsp_1.setPreferredSize(new Dimension(300, 300));
         p_main.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         
@@ -133,7 +138,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
 	this.p_main.add(ta_log, c);
         
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	setPreferredSize(new Dimension(800,600));
+	setPreferredSize(new Dimension(600,400));
 	pack();
 	setLayout(new BorderLayout());
 	setLocationRelativeTo(null);
@@ -203,11 +208,11 @@ public class GoldenGUI extends JFrame implements ItemListener{
                     //bi2.setRGB(i, j, newVal);
                 }
             }
-            //imageFrame.add(test);
+            imageFrame.add(test);
             //JLabel picLabel = new JLabel(new ImageIcon(bi2));
             //p_video.add(picLabel);
-            test.viewPixels();
-            test.viewQuantities();
+            //test.viewPixels();
+            //test.viewQuantities();
         } catch (Exception ex) {
             ta_log.append("Image does not exist - RGB : " + i + ", " + j + "\n");
         }
@@ -216,7 +221,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
     
     private void run(){
         ArrayList<File> temp = null;
-        int SD;
+        int SDi;
         ImageGS x, y;
         switch(currOpt){
             case 0: temp = uni; break;
@@ -224,18 +229,25 @@ public class GoldenGUI extends JFrame implements ItemListener{
             case 2: temp = MJ; break;
         }
         
-        for(int i=0; i<2; i++){
-            SD = 0;
+        for(int i=0; i<(temp.size()-1); i++){
+            SDi = 0;
             x = rgbToGS(temp.get(i));
             y = rgbToGS(temp.get(i+1));
-            System.out.println("Name "+i+": "+temp.get(i).getName());
-            for(int j=0; j<256; j++){
+            //System.out.println("Name "+i+": "+temp.get(i).getName());
+            for(int j=0; j<64; j++){
                 int a = x.getQuantity(j);
                 int b = y.getQuantity(j);
-                SD += Math.abs(a-b);
+                SDi += Math.abs(a-b);
             }
-            System.out.println("SD of "+i+" & "+(i+1)+" = " + SD);
+            SD.add(SDi);
+            if(SDi>4000){
+                System.out.println("SD of "+temp.get(i).getName()+" & "+temp.get(i+1).getName()+" = " + SDi);
+            }
         }
+    }
+    
+    public void GT(){
+        
     }
     
     /*private void openFile() {
@@ -283,7 +295,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
                 if(e.getStateChange() == ItemEvent.SELECTED) {
                     currOpt = cb_option.getSelectedIndex();
                     System.out.println(currOpt);
-                    ta_log.append("Option Combo Box changed\n");
+                    //ta_log.append("Option Combo Box changed\n");
                 }
             break;
             default: System.out.println("The ComboBox does not exist");

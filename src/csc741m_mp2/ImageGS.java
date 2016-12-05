@@ -7,9 +7,9 @@ import java.util.Arrays;
  * @author Laurence Foz
  */
 public class ImageGS {
-    private ArrayList<Integer> gs_pixels;
-    private ArrayList<Integer> alpha_pixels;
-    private Integer[] quantity;
+    private final ArrayList<Integer> gs_pixels;
+    private final ArrayList<Integer> alpha_pixels;
+    private final Integer[] quantity;
     
     public ImageGS(){
         gs_pixels = new ArrayList<>();
@@ -59,12 +59,9 @@ public class ImageGS {
     }
     
     public void viewQuantities(){
-        Integer keeper = 0;
         for(int i=0;i<quantity.length;i++){
             System.out.println("Quantity of "+ i + ": " +quantity[i]);
-            keeper += quantity[i];
         }
-        System.out.println("Total of Quantity: "+keeper);
     }
     
 }
