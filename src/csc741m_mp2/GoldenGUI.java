@@ -200,7 +200,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
     
     private void run(){
         ta_log.append("Running...\n");
-        ArrayList<File> temp = new ArrayList<>();
+        //ArrayList<File> temp = new ArrayList<>();
         imageFrame = new ArrayList<>();
         SD = new ArrayList<>();
         getCurr();
@@ -227,9 +227,9 @@ public class GoldenGUI extends JFrame implements ItemListener{
             }
             imageFrame.add(x);
             SD.add(SDi);
-            if(SDi>thresh){ //threshold
+            /*if(SDi>thresh){ //threshold
                 System.out.println("SD of "+curr.get(i).getName()+" & "+curr.get(i+1).getName()+" = " + SDi);
-            }
+            }*/
         }
         last = rgbToGS(curr.get(size-1));
         imageFrame.add(last);
@@ -294,7 +294,9 @@ public class GoldenGUI extends JFrame implements ItemListener{
         Integer AC = 0;
         for(int i=0; i<SD.size(); i++){
             if(SD.get(i) > thresh){
-                temp1.add(i);
+                if(!temp1.contains(new Integer(i))){
+                    temp1.add(i);
+                }
                 if(!temp1.contains(new Integer(i+1))){
                     temp1.add(i+1);
                 }
@@ -311,9 +313,13 @@ public class GoldenGUI extends JFrame implements ItemListener{
             for(int i = 0; i<temp1.size(); i++){
                 System.out.println(temp1.get(i));
             }
-            ArrayList<ImageGS> go = new ArrayList<>( imageFrame.subList(0, temp1.get(0)) );
-            Scene scene = new Scene(go);
-            AveHisto(scene.getFrames());
+            ArrayList<Integer> shotBound = getShotBoundaries(temp1);
+            for(int i=0; i<shotBound.size(); i+=2){
+                ArrayList<ImageGS> go = new ArrayList<>( imageFrame.subList(shotBound.get(i), shotBound.get(i+1)) );
+                ta_log.append("Frame Numbers #"+shotBound.get(i) + " - " + (shotBound.get(i+1)-1) + "\n");
+                Scene scene = new Scene(go);
+                AveHisto(scene.getFrames(), shotBound.get(i));
+            }
         }
     }
     
@@ -338,26 +344,34 @@ public class GoldenGUI extends JFrame implements ItemListener{
         return stdev;
     }
     
-    public void getShotBoundaries(ArrayList<Integer> tr){
-        ArrayList <Integer> frameNum = new ArrayList<>();
-        Integer x = 0;
-        Integer y = tr.get(0);
-        frameNum.add(x);
-        frameNum.add(y);
-        for(int i=1; i<tr.size(); i++){
-            if(tr.get(i) == ( tr.get(i-1)+1 )){
-                
+    public ArrayList<Integer> getShotBoundaries(ArrayList<Integer> tr){
+        ArrayList<Integer> frameNum = new ArrayList<>();
+        frameNum.add(0);
+        frameNum.add(tr.get(0));
+        int size = tr.size();
+        for(int i=1; i<size; i++){
+            if(tr.get(i) != ( tr.get(i-1)+1 )){
+                frameNum.add(tr.get(i-1)+1);
+                frameNum.add(tr.get(i));
+                /*i++;
+            } else {*/
             }
         }
+        frameNum.add(tr.get(size-1));
+        frameNum.add(imageFrame.size());
+        return frameNum;
     }
     
-    public void AveHisto(ArrayList<ImageGS> last){
+    public void AveHisto(ArrayList<ImageGS> last, Integer add){
         //Average Histogram Method then display to GUI
         Double ave, lowest, diff;
         int index = 0;
-        ImageGS x, y;
+        ImageGS x;
         ArrayList<Double> overall = new ArrayList<>();
         lowest = 0.0;
+        if(add>0){
+            add -= 1;
+        }
         
         for(int i=0; i<64; i++){
             ave = 0.0;
@@ -383,7 +397,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
         }
         System.out.println("Lowest: "+lowest);
         System.out.println("Index: "+index);
-        addKeyFrame(curr.get(index));
+        addKeyFrame(curr.get(index+add));
     }
     
     public void addKeyFrame(File file){
