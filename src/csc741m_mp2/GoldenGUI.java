@@ -39,103 +39,117 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class GoldenGUI extends JFrame implements ItemListener{
     private final JPanel p_main, p_video;
     private final JTextArea ta_log;
-    private final JComboBox cb_option;
-    private final JLabel lbl_imgPane, lbl_method, lbl_log;
-    private final JScrollPane jsp_1;
+    private final JComboBox cb_option, cb_thresh;
+    private final JLabel lbl_imgPane, lbl_method, lbl_log, lbl_thresh;
+    private final JScrollPane jsp_1, jsp_2;
     private JMenu file;
     private JMenuItem run;
     private String path;
     private JFileChooser jfc;
-    private ArrayList<File> uni, _777, MJ;          //Image Databases
-    private final ArrayList<ImageGS> imageFrame;    //Contains the Grayscale Images
-    private final ArrayList<Integer> SD;            //SD between frames
-    private Integer currOpt;
+    private ArrayList<File> uni, _777, MJ;  //Image Databases
+    private ArrayList<ImageGS> imageFrame;  //Contains the Grayscale Images
+    private ArrayList<Integer> SD;    //SD between frames
+    private Integer currOpt, thresh;
     private final String[] dir;
     
     public GoldenGUI(){
-        super("Video Segmentation System");
+        super("FinVidSeg Video Segmentation System");
         super.setJMenuBar(setMenuBar());
         
-        ta_log = new JTextArea(8,10);
+        //TextArea
+        ta_log = new JTextArea(8,15);
         ta_log.setEditable(false);
         ta_log.setWrapStyleWord(true);
         ta_log.setLineWrap(true);
-        imageFrame = new ArrayList<>();
-        SD = new ArrayList<>();
-        currOpt = 0;
         
-        lbl_log = new JLabel("LOG");
-        lbl_log.setFont(new Font("Calibri", Font.PLAIN, 14));
-        lbl_method = new JLabel("DATABASE");
-        lbl_method.setFont(new Font("Calibri", Font.PLAIN, 14));
+        //JLabels
         lbl_imgPane = new JLabel("IMAGE");
-        lbl_imgPane.setFont(new Font("Calibri", Font.PLAIN, 14));
+        lbl_method = new JLabel("DATABASE");
+        lbl_thresh = new JLabel("THRESHOLD");
+        lbl_log = new JLabel("LOG");
         
-        dir = new String[]{"uni","777","mjack"};
+        lbl_imgPane.setFont(new Font("Calibri", Font.PLAIN, 14));
+        lbl_method.setFont(new Font("Calibri", Font.PLAIN, 14));
+        lbl_thresh.setFont(new Font("Calibri", Font.PLAIN, 14));
+        lbl_log.setFont(new Font("Calibri", Font.PLAIN, 14));
+        
+        //JComboBox #1
+        dir = new String[]{"uni","777","mjack"};    //Image Database Combo Box
         cb_option = new JComboBox(dir);
         cb_option.addItemListener(this);
         cb_option.setName("cb_option");
         cb_option.setFont(new Font("Calibri", Font.PLAIN, 14));
         
+        //JComboBox #2
+        cb_thresh = new JComboBox(new String[]{"4000","4500","5000"});  //Threshold ComboBox
+        cb_thresh.addItemListener(this);
+        cb_thresh.setName("cb_thresh");
+        cb_thresh.setFont(new Font("Calibri", Font.PLAIN, 14));
+        
+        //Variable Declaration
+        //imageFrame = new ArrayList<>();
+        //SD = new ArrayList<>();
+        currOpt = 0;
+        thresh = Integer.valueOf(cb_thresh.getSelectedItem().toString());
+        
+        //Panels
         p_main = new JPanel();
         p_video = new JPanel();
         jsp_1 = new JScrollPane(p_video, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        jsp_1.setPreferredSize(new Dimension(300, 300));
+        jsp_2 = new JScrollPane(ta_log, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        jsp_1.setPreferredSize(new Dimension(250, 300));
+        jsp_2.setPreferredSize(new Dimension(200, 130));
         p_main.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         
+        c.fill = GridBagConstraints.HORIZONTAL;
+	c.weightx = 0.5;
+        
         //First Line
 	c.gridy = 0;
+	c.insets = new Insets(5,10,0,10);
         
-        c.fill = GridBagConstraints.HORIZONTAL;
-	c.weightx = 0.5;
 	c.gridx = 0;
-	c.insets = new Insets(5,10,5,10);
 	this.p_main.add(lbl_imgPane, c);
         
-        c.fill = GridBagConstraints.HORIZONTAL;
-	c.weightx = 0.5;
 	c.gridx = 1;
-	c.insets = new Insets(5,10,5,10);
 	this.p_main.add(lbl_method, c);
+        
+	c.gridx = 2;
+	this.p_main.add(lbl_thresh, c);
         
         //Second Line
         c.gridy = 1;
+	c.insets = new Insets(10,10,10,10);
         
-        c.fill = GridBagConstraints.HORIZONTAL;
-	c.weightx = 0.5;
 	c.gridx = 0;
         c.gridheight = 3;
-	c.insets = new Insets(10,10,10,10);
 	this.p_main.add(jsp_1, c);
         
-        c.fill = GridBagConstraints.HORIZONTAL;
-	c.weightx = 0.5;
 	c.gridx = 1;
         c.gridheight = 1;
-	c.insets = new Insets(10,10,10,10);
 	this.p_main.add(cb_option, c);
+        
+        c.gridx = 2;
+	this.p_main.add(cb_thresh, c);
         
         //Third Line
 	c.gridy = 2;
-        
-        c.fill = GridBagConstraints.HORIZONTAL;
-	c.weightx = 0.5;
-	c.gridx = 1;
-        c.gridheight = 1;
 	c.insets = new Insets(10,10,10,10);
+        
+	c.gridx = 1;
 	this.p_main.add(lbl_log, c);
         
         //Fourth Line
 	c.gridy = 3;
         
-        c.fill = GridBagConstraints.HORIZONTAL;
-	c.weightx = 0.5;
 	c.gridx = 1;
-        c.gridheight = 1;
+        //c.gridheight = 1;
+	c.gridwidth = 2;
 	c.insets = new Insets(10,10,100,10);
-	this.p_main.add(ta_log, c);
+	this.p_main.add(jsp_2, c);
         
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	setPreferredSize(new Dimension(600,400));
@@ -173,7 +187,51 @@ public class GoldenGUI extends JFrame implements ItemListener{
             }
             //System.out.println("Files in images Folder: "+folder.size());
         }
-        rgbToGS(uni.get(0));
+        //Integer[] toArrL = new Integer[] {5,5,19,5,8};
+        //ArrayList<Integer> intArray = new ArrayList<>(Arrays.asList(toArrL));
+        //getSTDev(intArray);
+    }
+    
+    private void run(){
+        ta_log.append("Running...\n");
+        ArrayList<File> temp = null;
+        imageFrame = new ArrayList<>();
+        SD = new ArrayList<>();
+        int SDi, size;
+        
+        ImageGS x, y, last;
+        
+        switch(currOpt){
+            case 0: temp = uni; break;
+            case 1: temp = _777; break;
+            case 2: temp = MJ; break;
+        }
+        
+        size = temp.size();
+        
+        for(int i=0; i<(temp.size()-1); i++){
+            SDi = 0;
+            x = rgbToGS(temp.get(i));
+            y = rgbToGS(temp.get(i+1));
+            for(int j=0; j<64; j++){
+                int a = x.getQuantity(j);
+                int b = y.getQuantity(j);
+                SDi += Math.abs(a-b);
+            }
+            imageFrame.add(x);
+            SD.add(SDi);
+            /*if(SDi>thresh){ //threshold
+                System.out.println("SD of "+temp.get(i).getName()+" & "+temp.get(i+1).getName()+" = " + SDi);
+            }*/
+        }
+        last = rgbToGS(temp.get(size-1));
+        imageFrame.add(last);
+        ta_log.append("Grayscale images calculated and stored...\n");
+        //System.out.println("Temp: "         +temp.size());
+        //System.out.println("Image Frame: "  +imageFrame.size());
+        //System.out.println("SD: "           +SD.size());
+        ta_log.append("Obtained SDi\n");
+        GT();
     }
     
     public ImageGS rgbToGS(File filename){
@@ -208,7 +266,6 @@ public class GoldenGUI extends JFrame implements ItemListener{
                     //bi2.setRGB(i, j, newVal);
                 }
             }
-            imageFrame.add(test);
             //JLabel picLabel = new JLabel(new ImageIcon(bi2));
             //p_video.add(picLabel);
             //test.viewPixels();
@@ -219,35 +276,42 @@ public class GoldenGUI extends JFrame implements ItemListener{
         return test;
     }
     
-    private void run(){
-        ArrayList<File> temp = null;
-        int SDi;
-        ImageGS x, y;
-        switch(currOpt){
-            case 0: temp = uni; break;
-            case 1: temp = _777; break;
-            case 2: temp = MJ; break;
-        }
-        
-        for(int i=0; i<(temp.size()-1); i++){
-            SDi = 0;
-            x = rgbToGS(temp.get(i));
-            y = rgbToGS(temp.get(i+1));
-            //System.out.println("Name "+i+": "+temp.get(i).getName());
-            for(int j=0; j<64; j++){
-                int a = x.getQuantity(j);
-                int b = y.getQuantity(j);
-                SDi += Math.abs(a-b);
-            }
-            SD.add(SDi);
-            if(SDi>4000){
-                System.out.println("SD of "+temp.get(i).getName()+" & "+temp.get(i+1).getName()+" = " + SDi);
+    public void GT(){
+        ta_log.append("Searching for Transition Frames\n");
+        //Find transitions and kill them all
+        Double aver = getMean(SD);
+        Double stdev = getSTDev(SD);
+        ArrayList<Integer> temp1 = new ArrayList<>();
+        Integer AC = 0;
+        for(int i=0; i<SD.size(); i++){
+            if(SD.get(i) > thresh){
+                temp1.add(SD.get(i));
+                AC += SD.get(i);
             }
         }
+        Double Tb = aver + 5*stdev;
+        System.out.println("Average: "+aver+"\nSt. Dev: "+stdev+"\nAC: "+AC+"\nTb: "+Tb);
     }
     
-    public void GT(){
-        //Find transitions and kill them all
+    public double getMean(ArrayList<Integer> total){
+        double sum = 0.0;
+        for(double a : total)
+            sum += a;
+        return sum/total.size();
+    }
+    
+    public double getSTDev(ArrayList<Integer> total){
+        double stdev = 0;
+        int size = total.size();
+        
+        double mean = getMean(total);
+        double temp = 0;
+        for(double a :total)
+            temp += (a-mean)*(a-mean);
+        
+        stdev = Math.sqrt(temp/size);
+        //System.out.println(stdev);
+        return stdev;
     }
     
     public void AveHisto(ArrayList<ImageGS> last){
@@ -304,11 +368,16 @@ public class GoldenGUI extends JFrame implements ItemListener{
     public void itemStateChanged(ItemEvent e) {
         JComboBox source = (JComboBox) e.getSource();
         switch(source.getName()) {
+            case "cb_thresh":
+                if(e.getStateChange() == ItemEvent.SELECTED) {
+                    thresh = Integer.valueOf(cb_thresh.getSelectedItem().toString());
+                    System.out.println(thresh);
+                }
+            break;
             case "cb_option":
                 if(e.getStateChange() == ItemEvent.SELECTED) {
                     currOpt = cb_option.getSelectedIndex();
                     System.out.println(currOpt);
-                    //ta_log.append("Option Combo Box changed\n");
                 }
             break;
             default: System.out.println("The ComboBox does not exist");
