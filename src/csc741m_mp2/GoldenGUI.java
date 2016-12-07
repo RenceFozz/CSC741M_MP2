@@ -199,6 +199,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
     
     private void run(){
         ta_log.append("Running...\n");
+        clearImgPane();
         //ArrayList<File> temp = new ArrayList<>();
         imageFrame = new ArrayList<>();
         SD = new ArrayList<>();
@@ -453,6 +454,12 @@ public class GoldenGUI extends JFrame implements ItemListener{
             case 2: curr = MJ; break;
             default: ta_log.append("Database not found");
         }
+    }
+    
+    private void clearImgPane(){
+        p_video.removeAll();
+        p_video.revalidate();
+        p_video.repaint();
     }
     
     private JMenuBar setMenuBar(){
