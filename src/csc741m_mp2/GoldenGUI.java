@@ -7,6 +7,7 @@ import java.awt.Event;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -16,8 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -97,7 +96,7 @@ public class GoldenGUI extends JFrame implements ItemListener{
         
         //Panels
         p_main = new JPanel();
-        p_video = new JPanel();
+        p_video = new JPanel(new GridLayout(0,2));
         jsp_1 = new JScrollPane(p_video, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         jsp_2 = new JScrollPane(ta_log, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
@@ -285,12 +284,12 @@ public class GoldenGUI extends JFrame implements ItemListener{
     
     public void GT(){
         ta_log.append("Searching for Transition Frames\n");
-        //Find transitions and kill them all
+        //Find transitions
         Double aver = getMean(SD);
         Double stdev = getSTDev(SD);
         ta_log.append("Mean and Standard Deviation calculated...\n");
         ArrayList<Integer> temp1 = new ArrayList<>();
-        ArrayList<Integer> temp2 = new ArrayList<>();
+        //ArrayList<Integer> temp2 = new ArrayList<>();
         Integer AC = 0;
         for(int i=0; i<SD.size(); i++){
             if(SD.get(i) > thresh){
@@ -301,10 +300,11 @@ public class GoldenGUI extends JFrame implements ItemListener{
                     temp1.add(i+1);
                 }
                 AC += SD.get(i);
-            } else {
+            } /*else {
                 temp2.add(i);
-            }
+            }*/
         }
+        temp1.add(curr.size());
         ta_log.append("AC calculated...\n");
         Double Tb = aver + 5*stdev;
         ta_log.append("Tb calculated...\n");
@@ -314,11 +314,13 @@ public class GoldenGUI extends JFrame implements ItemListener{
                 System.out.println(temp1.get(i));
             }
             ArrayList<Integer> shotBound = getShotBoundaries(temp1);
+            int num = 1;
             for(int i=0; i<shotBound.size(); i+=2){
                 ArrayList<ImageGS> go = new ArrayList<>( imageFrame.subList(shotBound.get(i), shotBound.get(i+1)) );
-                ta_log.append("Frame Numbers #"+shotBound.get(i) + " - " + (shotBound.get(i+1)-1) + "\n");
+                ta_log.append("Keyframe #"+num+": Frame Numbers #"+(shotBound.get(i) + 1) + " - " + (shotBound.get(i+1)-1) + "\n");
                 Scene scene = new Scene(go);
                 AveHisto(scene.getFrames(), shotBound.get(i));
+                num++;
             }
         }
     }
@@ -346,19 +348,30 @@ public class GoldenGUI extends JFrame implements ItemListener{
     
     public ArrayList<Integer> getShotBoundaries(ArrayList<Integer> tr){
         ArrayList<Integer> frameNum = new ArrayList<>();
-        frameNum.add(0);
-        frameNum.add(tr.get(0));
+        //frameNum.add(new Integer(0));
+        //frameNum.add(tr.get(0));
         int size = tr.size();
-        for(int i=1; i<size; i++){
-            if(tr.get(i) != ( tr.get(i-1)+1 )){
+        int n = frameNum.size() - 1;
+        int curr = 0;
+        for(int i=0; i<size; i++){
+            /*if(tr.get(i) != ( tr.get(i-1)+1 )){
                 frameNum.add(tr.get(i-1)+1);
                 frameNum.add(tr.get(i));
-                /*i++;
-            } else {*/
+                i++;
+            }*/
+            int x = tr.get(i) - curr;
+            if(x > 1){
+                frameNum.add(curr);
+                frameNum.add(tr.get(i));
+                n++;
             }
+            curr = tr.get(i);
         }
-        frameNum.add(tr.get(size-1));
-        frameNum.add(imageFrame.size());
+        for(int i=0; i<frameNum.size(); i++){
+            System.out.println(frameNum.get(i));
+        }
+        //frameNum.add(tr.get(size-1));
+        //frameNum.add(imageFrame.size());
         return frameNum;
     }
     
@@ -406,6 +419,8 @@ public class GoldenGUI extends JFrame implements ItemListener{
             bi1 = ImageIO.read(file);
             JLabel picLabel = new JLabel(new ImageIcon(bi1));
             p_video.add(picLabel);
+            p_video.revalidate();
+            p_video.repaint();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
